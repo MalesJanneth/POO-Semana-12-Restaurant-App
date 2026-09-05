@@ -9,7 +9,6 @@ from modelos.producto import Producto
 from modelos.usuario import Usuario
 from modelos.venta import Venta
 
-
 class ArchivoServicio:
     """
     Gestiona la lectura y escritura de productos,

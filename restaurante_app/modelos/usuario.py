@@ -1,108 +1,72 @@
 """
 Este módulo contiene la clase Usuario.
-
 La clase Usuario representa de manera general
 a una persona registrada en el sistema.
 """
 
-
 class Usuario:
-    """
-    Representa un usuario registrado en el restaurante.
-
-    La clase administra únicamente la información
-    general correspondiente al usuario.
-    """
-
     def __init__(
         self,
         identificacion: str,
         nombre: str,
-        correo: str,
-    ) -> None:
+        correo: str
+    ):
         self.identificacion = identificacion
         self.nombre = nombre
         self.correo = correo
 
     @property
-    def identificacion(self) -> str:
-        """Devuelve la identificación del usuario."""
+    def identificacion(self):
         return self._identificacion
 
     @identificacion.setter
-    def identificacion(
-        self,
-        nueva_identificacion: str,
-    ) -> None:
-        """Establece y valida la identificación."""
-
-        if not nueva_identificacion.strip():
+    def identificacion(self, valor):
+        if not valor or not isinstance(valor, str):
             raise ValueError(
-                "La identificación no puede estar vacía."
+                "La identificación del usuario es obligatoria."
             )
-
-        self._identificacion = nueva_identificacion.strip()
+        self._identificacion = valor
 
     @property
-    def nombre(self) -> str:
-        """Devuelve el nombre del usuario."""
+    def nombre(self):
         return self._nombre
 
     @nombre.setter
-    def nombre(
-        self,
-        nuevo_nombre: str,
-    ) -> None:
-        """Establece y valida el nombre."""
-
-        if not nuevo_nombre.strip():
+    def nombre(self, valor):
+        if not valor or not isinstance(valor, str):
             raise ValueError(
-                "El nombre no puede estar vacío."
+                "El nombre del usuario es obligatorio."
             )
-
-        self._nombre = nuevo_nombre.strip()
+        self._nombre = valor
 
     @property
-    def correo(self) -> str:
-        """Devuelve el correo del usuario."""
+    def correo(self):
         return self._correo
 
     @correo.setter
-    def correo(
-        self,
-        nuevo_correo: str,
-    ) -> None:
-        """Establece y valida el correo."""
-
-        if not nuevo_correo.strip():
+    def correo(self, valor):
+        if not valor or not isinstance(valor, str):
             raise ValueError(
-                "El correo no puede estar vacío."
+                "El correo electrónico es obligatorio."
             )
 
-        if "@" not in nuevo_correo:
+        if "@" not in valor:
             raise ValueError(
-                "El correo debe contener el símbolo @."
+                "El correo electrónico no es válido."
             )
 
-        self._correo = nuevo_correo.strip()
+        self._correo = valor
 
-    def mostrar_informacion(self) -> str:
-        """Devuelve la información del usuario."""
-
+    def mostrar_informacion(self):
         return (
             f"Identificación: {self.identificacion} | "
             f"Nombre: {self.nombre} | "
             f"Correo: {self.correo}"
         )
 
-    def a_diccionario(self) -> dict[str, str]:
-        """
-        Convierte el objeto Usuario en un diccionario
-        compatible con formato JSON.
-        """
-
+    def a_diccionario(self):
         return {
             "identificacion": self.identificacion,
             "nombre": self.nombre,
-            "correo": self.correo,
+            "correo": self.correo
         }

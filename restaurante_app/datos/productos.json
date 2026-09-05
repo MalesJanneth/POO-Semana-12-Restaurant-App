@@ -1,25 +1,49 @@
 [
     {
         "codigo": "01",
-        "nombre": "Encebollado",
-        "categoria": "Sopa",
-        "precio": 3.5,
+        "nombre": "Seco de pollo",
+        "categoria": "Secos",
+        "precio": 2.5,
         "stock": 3,
         "disponible": true
     },
     {
         "codigo": "02",
-        "nombre": "Arooz con camaron",
-        "categoria": "Segundo",
-        "precio": 5.99,
+        "nombre": "Jugo",
+        "categoria": "Bebida",
+        "precio": 1.5,
         "stock": 3,
         "disponible": true
     },
     {
         "codigo": "03",
-        "nombre": "Churrasco",
-        "categoria": "Segundos",
-        "precio": 6.0,
+        "nombre": "Encebollado",
+        "categoria": "Sopas",
+        "precio": 4.5,
+        "stock": 2,
+        "disponible": true
+    },
+    {
+        "codigo": "04",
+        "nombre": "Arroz con camaron",
+        "categoria": "Platos a la carta",
+        "precio": 4.5,
+        "stock": 2,
+        "disponible": true
+    },
+    {
+        "codigo": "06",
+        "nombre": "Cake",
+        "categoria": "Postre",
+        "precio": 2.0,
+        "stock": 4,
+        "disponible": true
+    },
+    {
+        "codigo": "05",
+        "nombre": "Camarones",
+        "categoria": "Platos a la carta",
+        "precio": 4.0,
         "stock": 2,
         "disponible": true
     }

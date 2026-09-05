@@ -284,7 +284,13 @@ def eliminar_producto(
 def listar_productos(
     restaurante: Restaurante,
 ) -> None:
-    """Muestra todos los productos registrados."""
+    """
+    Muestra todos los productos registrados.
+
+    La lista principal sigue almacenando objetos Producto.
+    Para mostrar sus datos se utiliza el método
+    mostrar_informacion().
+    """
 
     productos = restaurante.listar_productos()
 
@@ -294,8 +300,8 @@ def listar_productos(
 
     print("\n=== PRODUCTOS REGISTRADOS ===")
 
-    for informacion_producto in productos:
-        print(informacion_producto)
+    for producto in productos:
+        print(producto.mostrar_informacion())
 
 
 def registrar_usuario(
@@ -341,7 +347,12 @@ def registrar_usuario(
 def listar_usuarios(
     restaurante: Restaurante,
 ) -> None:
-    """Muestra todos los usuarios registrados."""
+    """
+    Muestra todos los usuarios registrados.
+
+    Los objetos Usuario se mantienen en la lista principal
+    y se utiliza mostrar_informacion() para su presentación.
+    """
 
     usuarios = restaurante.listar_usuarios()
 
@@ -351,8 +362,8 @@ def listar_usuarios(
 
     print("\n=== USUARIOS REGISTRADOS ===")
 
-    for informacion_usuario in usuarios:
-        print(informacion_usuario)
+    for usuario in usuarios:
+        print(usuario.mostrar_informacion())
 
 
 def mostrar_categorias(
@@ -548,9 +559,9 @@ def main() -> None:
     """
     Punto de entrada de la aplicación.
 
-    Se crean los servicios, se cargan productos, usuarios
-    y ventas almacenados y posteriormente se ejecuta
-    el menú.
+    Se crean los servicios, se cargan los datos almacenados
+    en JSON y posteriormente se reconstruyen los índices
+    en memoria mediante Restaurante.
     """
 
     restaurante = Restaurante()
@@ -560,6 +571,10 @@ def main() -> None:
         ruta_usuarios=RUTA_USUARIOS,
         ruta_ventas=RUTA_VENTAS,
     )
+
+    # ========================================================
+    # CARGAR DATOS DESDE JSON
+    # ========================================================
 
     productos_cargados = (
         archivo_servicio.cargar_productos()
@@ -573,6 +588,10 @@ def main() -> None:
         archivo_servicio.cargar_ventas()
     )
 
+    # ========================================================
+    # CARGAR COLECCIONES Y RECONSTRUIR ÍNDICES
+    # ========================================================
+
     restaurante.cargar_productos(
         productos_cargados
     )
@@ -584,6 +603,10 @@ def main() -> None:
     restaurante.cargar_ventas(
         ventas_cargadas
     )
+
+    # ========================================================
+    # MENÚ
+    # ========================================================
 
     acciones_menu = obtener_acciones_menu()
 

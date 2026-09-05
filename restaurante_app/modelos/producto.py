@@ -1,19 +1,4 @@
-"""
-Este módulo contiene la clase Producto.
-
-La clase Producto representa la información general
-de un producto registrado en el restaurante.
-"""
-
-
 class Producto:
-    """
-    Representa un producto del restaurante.
-
-    La clase administra la información correspondiente
-    a cada producto y su stock disponible.
-    """
-
     def __init__(
         self,
         codigo: str,
@@ -21,8 +6,8 @@ class Producto:
         categoria: str,
         precio: float,
         stock: int,
-        disponible: bool = True,
-    ) -> None:
+        disponible: bool = True
+    ):
         self.codigo = codigo
         self.nombre = nombre
         self.categoria = categoria
@@ -31,156 +16,93 @@ class Producto:
         self.disponible = disponible
 
     @property
-    def codigo(self) -> str:
-        """Devuelve el código del producto."""
+    def codigo(self):
         return self._codigo
 
     @codigo.setter
-    def codigo(self, nuevo_codigo: str) -> None:
-        """Establece y valida el código del producto."""
-
-        if not nuevo_codigo.strip():
-            raise ValueError(
-                "El código no puede estar vacío."
-            )
-
-        self._codigo = nuevo_codigo.strip()
+    def codigo(self, valor):
+        if not valor or not isinstance(valor, str):
+            raise ValueError("El código del producto es obligatorio.")
+        self._codigo = valor
 
     @property
-    def nombre(self) -> str:
-        """Devuelve el nombre del producto."""
+    def nombre(self):
         return self._nombre
 
     @nombre.setter
-    def nombre(self, nuevo_nombre: str) -> None:
-        """Establece y valida el nombre del producto."""
-
-        if not nuevo_nombre.strip():
-            raise ValueError(
-                "El nombre no puede estar vacío."
-            )
-
-        self._nombre = nuevo_nombre.strip()
+    def nombre(self, valor):
+        if not valor or not isinstance(valor, str):
+            raise ValueError("El nombre del producto es obligatorio.")
+        self._nombre = valor
 
     @property
-    def categoria(self) -> str:
-        """Devuelve la categoría del producto."""
+    def categoria(self):
         return self._categoria
 
     @categoria.setter
-    def categoria(
-        self,
-        nueva_categoria: str,
-    ) -> None:
-        """Establece y valida la categoría del producto."""
-
-        if not nueva_categoria.strip():
-            raise ValueError(
-                "La categoría no puede estar vacía."
-            )
-
-        self._categoria = nueva_categoria.strip()
+    def categoria(self, valor):
+        if not valor or not isinstance(valor, str):
+            raise ValueError("La categoría del producto es obligatoria.")
+        self._categoria = valor
 
     @property
-    def precio(self) -> float:
-        """Devuelve el precio del producto."""
+    def precio(self):
         return self._precio
 
     @precio.setter
-    def precio(self, nuevo_precio: float) -> None:
-        """Establece y valida el precio del producto."""
-
-        if nuevo_precio <= 0:
-            raise ValueError(
-                "El precio debe ser mayor que cero."
-            )
-
-        self._precio = nuevo_precio
+    def precio(self, valor):
+        if not isinstance(valor, (int, float)) or valor < 0:
+            raise ValueError("El precio debe ser un número mayor o igual a cero.")
+        self._precio = float(valor)
 
     @property
-    def stock(self) -> int:
-        """Devuelve el stock disponible del producto."""
+    def stock(self):
         return self._stock
 
     @stock.setter
-    def stock(self, nuevo_stock: int) -> None:
-        """Establece y valida el stock del producto."""
-
-        if not isinstance(nuevo_stock, int):
-            raise ValueError(
-                "El stock debe ser un número entero."
-            )
-
-        if nuevo_stock < 0:
-            raise ValueError(
-                "El stock no puede ser negativo."
-            )
-
-        self._stock = nuevo_stock
+    def stock(self, valor):
+        if not isinstance(valor, int) or valor < 0:
+            raise ValueError("El stock debe ser un entero mayor o igual a cero.")
+        self._stock = valor
 
     @property
-    def disponible(self) -> bool:
-        """Devuelve el estado de disponibilidad."""
+    def disponible(self):
         return self._disponible
 
     @disponible.setter
-    def disponible(self, estado: bool) -> None:
-        """Establece el estado de disponibilidad."""
-        self._disponible = estado
+    def disponible(self, valor):
+        if not isinstance(valor, bool):
+            raise ValueError("La disponibilidad debe ser verdadera o falsa.")
+        self._disponible = valor
 
-    def vender(self, cantidad: int) -> None:
-        """
-        Disminuye el stock del producto después de
-        una venta válida.
-        """
-
-        if cantidad <= 0:
-            raise ValueError(
-                "La cantidad debe ser mayor que cero."
-            )
+    def vender(self, cantidad):
+        if not isinstance(cantidad, int) or cantidad <= 0:
+            raise ValueError("La cantidad debe ser un entero mayor que cero.")
 
         if cantidad > self.stock:
-            raise ValueError(
-                "No existe stock suficiente."
-            )
+            raise ValueError("No hay suficiente stock disponible.")
 
         self.stock -= cantidad
 
         if self.stock == 0:
             self.disponible = False
 
-    def mostrar_informacion(self) -> str:
-        """
-        Devuelve una representación del producto
-        para mostrarlo en la consola.
-        """
-
-        estado = (
-            "Disponible"
-            if self.disponible
-            else "No disponible"
-        )
-
+    def mostrar_informacion(self):
         return (
             f"Código: {self.codigo} | "
             f"Nombre: {self.nombre} | "
             f"Categoría: {self.categoria} | "
             f"Precio: ${self.precio:.2f} | "
             f"Stock: {self.stock} | "
-            f"Estado: {estado}"
+            f"Disponible: {self.disponible}"
         )
 
-    def a_diccionario(self) -> dict[str, object]:
-        """
-        Convierte el objeto Producto en un diccionario
-        compatible con formato JSON.
-        """
-
+    def a_diccionario(self):
         return {
             "codigo": self.codigo,
             "nombre": self.nombre,
             "categoria": self.categoria,
             "precio": self.precio,
             "stock": self.stock,
-            "disponible": self.disponible,
+            "disponible": self.disponible
         }
