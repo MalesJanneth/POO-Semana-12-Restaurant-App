@@ -1,279 +1,219 @@
-"""
-Módulo que contiene la clase Restaurante.
-
-Restaurante administra las colecciones principales de
-productos, usuarios y ventas, utilizando diccionarios
-como índices en memoria para optimizar las búsquedas
-frecuentes.
-"""
-
 from modelos.producto import Producto
 from modelos.usuario import Usuario
 from modelos.venta import Venta
 
 
 class Restaurante:
-    def __init__(self):
-        # ========================================================
-        # COLECCIONES PRINCIPALES
-        # ========================================================
+    """
+    Gestiona las colecciones principales del restaurante y utiliza
+    estructuras auxiliares para mejorar las búsquedas y consultas.
+    """
 
-        # Las listas se mantienen como colecciones principales
-        # para almacenar y recorrer los objetos del sistema.
+    def __init__(self) -> None:
+        # Colecciones principales.
+        # Se mantienen como listas porque permiten almacenar, recorrer
+        # y persistir los objetos.
         self._productos: list[Producto] = []
         self._usuarios: list[Usuario] = []
         self._ventas: list[Venta] = []
 
-        # ========================================================
-        # ÍNDICES EN MEMORIA
-        # ========================================================
-
-        # Índice de productos por código.
-        # Permite realizar búsquedas directas mediante el código.
+        # Índices auxiliares para búsquedas frecuentes.
         self._productos_por_codigo: dict[str, Producto] = {}
-
-        # Índice de usuarios por identificación.
-        # Permite realizar búsquedas directas mediante la identificación.
         self._usuarios_por_identificacion: dict[str, Usuario] = {}
 
-        # Índice de ventas agrupadas por usuario.
-        # Evita recorrer toda la lista de ventas al consultar
-        # las ventas de un usuario específico.
+        # Índice agrupado para consultar las ventas de un usuario
+        # sin recorrer toda la colección de ventas.
         self._ventas_por_usuario: dict[str, list[Venta]] = {}
 
-    # ============================================================
+    # =========================================================
     # PRODUCTOS
-    # ============================================================
+    # =========================================================
 
-    def registrar_producto(self, producto: Producto) -> str:
-        """
-        Registra un producto.
+    def registrar_producto(
+        self,
+        codigo: str,
+        nombre: str,
+        categoria: str,
+        precio: float,
+        stock: int,
+        disponible: bool = True,
+    ) -> Producto:
 
-        Se actualizan tanto la lista principal como
-        el índice por código.
-        """
+        # Se consulta el índice en lugar de recorrer la lista.
+        if codigo in self._productos_por_codigo:
+            raise ValueError("Ya existe un producto con ese código.")
 
-        if self._buscar_producto_por_codigo(producto.codigo) is not None:
-            raise ValueError(
-                "Ya existe un producto con ese código."
-            )
+        producto = Producto(
+            codigo,
+            nombre,
+            categoria,
+            precio,
+            stock,
+            disponible,
+        )
 
-        # Colección principal
+        # Se actualizan la colección principal y el índice.
         self._productos.append(producto)
+        self._productos_por_codigo[codigo] = producto
 
-        # Índice
-        self._productos_por_codigo[producto.codigo] = producto
-
-        return "Producto registrado correctamente."
+        return producto
 
     def buscar_producto(
         self,
-        codigo: str
+        codigo: str,
     ) -> Producto | None:
         """
-        Busca un producto utilizando el índice por código.
-
-        La búsqueda mediante diccionario tiene una complejidad
-        promedio O(1).
+        Busca un producto directamente mediante el índice por código.
         """
-
-        return self._buscar_producto_por_codigo(codigo)
+        return self._productos_por_codigo.get(codigo)
 
     def actualizar_producto(
         self,
         codigo_actual: str,
-        nuevo_codigo: str,
-        nuevo_nombre: str,
-        nueva_categoria: str,
-        nuevo_precio: float,
-        nuevo_stock: int,
-        nueva_disponibilidad: bool = True
-    ) -> str:
-        """
-        Actualiza los datos de un producto.
+        codigo: str,
+        nombre: str,
+        categoria: str,
+        precio: float,
+        stock: int,
+        disponible: bool = True,
+    ) -> Producto:
 
-        Si cambia el código, también se actualiza el índice
-        correspondiente para mantener la coherencia.
-        """
-
-        producto_actual = self._buscar_producto_por_codigo(
-            codigo_actual
-        )
-
-        if producto_actual is None:
-            raise ValueError(
-                "No existe un producto con ese código."
-            )
-
-        # Si el código cambia, comprobar que el nuevo código
-        # no pertenezca a otro producto.
-        if nuevo_codigo != codigo_actual:
-
-            producto_con_nuevo_codigo = (
-                self._buscar_producto_por_codigo(
-                    nuevo_codigo
-                )
-            )
-
-            if producto_con_nuevo_codigo is not None:
-                raise ValueError(
-                    "Ya existe otro producto con el nuevo código."
-                )
-
-        # Crear objeto actualizado.
-        producto_actualizado = Producto(
-            codigo=nuevo_codigo,
-            nombre=nuevo_nombre,
-            categoria=nueva_categoria,
-            precio=nuevo_precio,
-            stock=nuevo_stock,
-            disponible=nueva_disponibilidad
-        )
-
-        # Reemplazar en la lista principal.
-        indice = self._productos.index(producto_actual)
-        self._productos[indice] = producto_actualizado
-
-        # ========================================================
-        # ACTUALIZACIÓN DEL ÍNDICE
-        # ========================================================
-
-        del self._productos_por_codigo[codigo_actual]
-
-        self._productos_por_codigo[nuevo_codigo] = (
-            producto_actualizado
-        )
-
-        return "Producto actualizado correctamente."
-
-    def eliminar_producto(self, codigo: str) -> str:
-        """
-        Elimina un producto de la lista principal
-        y de su índice.
-        """
-
-        producto = self._buscar_producto_por_codigo(codigo)
+        # Búsqueda mediante el índice.
+        producto = self._productos_por_codigo.get(codigo_actual)
 
         if producto is None:
             raise ValueError(
                 "No existe un producto con ese código."
             )
 
-        # Eliminar de la colección principal.
+        # Se verifica que el nuevo código no pertenezca a otro producto.
+        if (
+            codigo != codigo_actual
+            and codigo in self._productos_por_codigo
+        ):
+            raise ValueError(
+                "Ya existe un producto con el nuevo código."
+            )
+
+        # Si cambia el código, se actualiza el código utilizado
+        # en las ventas existentes para mantener la relación.
+        if codigo != codigo_actual:
+            for venta in self._ventas:
+                if venta.producto_codigo == codigo_actual:
+                    venta.producto_codigo = codigo
+
+        # Se actualiza el mismo objeto en lugar de crear otro.
+        producto.codigo = codigo
+        producto.nombre = nombre
+        producto.categoria = categoria
+        producto.precio = precio
+        producto.stock = stock
+        producto.disponible = disponible
+
+        # Se sincroniza el índice de productos.
+        if codigo != codigo_actual:
+            del self._productos_por_codigo[codigo_actual]
+            self._productos_por_codigo[codigo] = producto
+
+        return producto
+
+    def eliminar_producto(
+        self,
+        codigo: str,
+    ) -> Producto:
+
+        # Búsqueda mediante el índice.
+        producto = self._productos_por_codigo.get(codigo)
+
+        if producto is None:
+            raise ValueError(
+                "No existe un producto con ese código."
+            )
+
+        # Se elimina de la colección principal.
         self._productos.remove(producto)
 
-        # Eliminar del índice.
+        # Se elimina del índice.
         del self._productos_por_codigo[codigo]
 
-        return "Producto eliminado correctamente."
+        return producto
 
     def listar_productos(self) -> list[Producto]:
-        """
-        Devuelve una copia de la lista principal de productos.
-        """
-
-        return self._productos.copy()
+        return list(self._productos)
 
     def obtener_productos(self) -> list[Producto]:
-        """
-        Devuelve una copia de la lista principal de productos.
-        """
-
-        return self._productos.copy()
+        return list(self._productos)
 
     def obtener_categorias(self) -> set[str]:
         """
-        Devuelve las categorías únicas de los productos.
-
-        Se utiliza un SET porque solamente interesan los
-        valores únicos y se desea evitar categorías repetidas.
+        Utiliza un set porque las categorías no deben repetirse.
         """
-
         return {
             producto.categoria
             for producto in self._productos
         }
 
-    # ============================================================
+    # =========================================================
     # USUARIOS
-    # ============================================================
+    # =========================================================
 
-    def registrar_usuario(self, usuario: Usuario) -> str:
-        """
-        Registra un usuario y actualiza el índice
-        de identificaciones.
-        """
+    def registrar_usuario(
+        self,
+        identificacion: str,
+        nombre: str,
+        correo: str,
+    ) -> Usuario:
 
-        if self._buscar_usuario_por_identificacion(
-            usuario.identificacion
-        ) is not None:
+        # Validación mediante el índice.
+        if identificacion in self._usuarios_por_identificacion:
             raise ValueError(
                 "Ya existe un usuario con esa identificación."
             )
 
-        # Colección principal.
-        self._usuarios.append(usuario)
+        usuario = Usuario(
+            identificacion,
+            nombre,
+            correo,
+        )
 
-        # Índice.
+        # Se actualizan la colección principal y el índice.
+        self._usuarios.append(usuario)
         self._usuarios_por_identificacion[
-            usuario.identificacion
+            identificacion
         ] = usuario
 
-        return "Usuario registrado correctamente."
+        return usuario
 
     def buscar_usuario(
         self,
-        identificacion: str
+        identificacion: str,
     ) -> Usuario | None:
         """
-        Busca un usuario utilizando el índice
-        de identificaciones.
+        Busca un usuario directamente mediante el índice.
         """
-
-        return self._buscar_usuario_por_identificacion(
+        return self._usuarios_por_identificacion.get(
             identificacion
         )
 
     def listar_usuarios(self) -> list[Usuario]:
-        """
-        Devuelve una copia de la lista principal de usuarios.
-        """
-
-        return self._usuarios.copy()
+        return list(self._usuarios)
 
     def obtener_usuarios(self) -> list[Usuario]:
-        """
-        Devuelve una copia de la lista principal de usuarios.
-        """
+        return list(self._usuarios)
 
-        return self._usuarios.copy()
-
-    # ============================================================
+    # =========================================================
     # VENTAS
-    # ============================================================
+    # =========================================================
 
     def vender_producto(
         self,
-        codigo_producto: str,
         identificacion_usuario: str,
-        cantidad: int
-    ) -> Venta | None:
-        """
-        Registra una venta y actualiza el stock.
+        codigo_producto: str,
+        cantidad: int,
+    ) -> Venta:
 
-        Las búsquedas de usuario y producto se realizan mediante
-        sus respectivos índices.
-
-        Además, la venta se almacena en:
-        1. La lista principal de ventas.
-        2. El índice de ventas por usuario.
-        """
-
-        # ========================================================
-        # BUSCAR USUARIO MEDIANTE ÍNDICE
-        # ========================================================
-
-        usuario = self._buscar_usuario_por_identificacion(
+        # Búsqueda del usuario mediante el índice.
+        usuario = self._usuarios_por_identificacion.get(
             identificacion_usuario
         )
 
@@ -282,11 +222,8 @@ class Restaurante:
                 "No existe un usuario con esa identificación."
             )
 
-        # ========================================================
-        # BUSCAR PRODUCTO MEDIANTE ÍNDICE
-        # ========================================================
-
-        producto = self._buscar_producto_por_codigo(
+        # Búsqueda del producto mediante el índice.
+        producto = self._productos_por_codigo.get(
             codigo_producto
         )
 
@@ -295,136 +232,71 @@ class Restaurante:
                 "No existe un producto con ese código."
             )
 
-        # ========================================================
-        # VALIDAR CANTIDAD
-        # ========================================================
-
         if not isinstance(cantidad, int) or cantidad <= 0:
             raise ValueError(
                 "La cantidad debe ser un entero mayor que cero."
             )
 
-        # ========================================================
-        # VALIDAR STOCK
-        # ========================================================
-
-        if cantidad > producto.stock:
+        if producto.stock < cantidad:
             raise ValueError(
                 "No existe suficiente stock disponible."
             )
 
-        # ========================================================
-        # CREAR VENTA
-        # ========================================================
-
+        # Se crea la venta como objeto.
         venta = Venta(
-            usuario_id=identificacion_usuario,
-            producto_codigo=codigo_producto,
-            cantidad=cantidad
+            usuario.identificacion,
+            producto.codigo,
+            cantidad,
         )
 
-        # ========================================================
-        # ACTUALIZAR LISTA PRINCIPAL DE VENTAS
-        # ========================================================
-
+        # Se actualiza la colección principal de ventas.
         self._ventas.append(venta)
 
-        # ========================================================
-        # ACTUALIZAR ÍNDICE DE VENTAS POR USUARIO
-        # ========================================================
+        # Se actualiza el índice de ventas por usuario.
+        ventas_usuario = self._ventas_por_usuario.setdefault(
+            usuario.identificacion,
+            []
+        )
 
-        if identificacion_usuario not in self._ventas_por_usuario:
-            self._ventas_por_usuario[
-                identificacion_usuario
-            ] = []
+        ventas_usuario.append(venta)
 
-        self._ventas_por_usuario[
-            identificacion_usuario
-        ].append(venta)
-
-        # ========================================================
-        # ACTUALIZAR STOCK
-        # ========================================================
-
+        # Se actualiza el stock del producto.
         producto.vender(cantidad)
 
         return venta
 
     def obtener_ventas(self) -> list[Venta]:
-        """
-        Devuelve una copia de la lista principal de ventas.
-        """
-
-        return self._ventas.copy()
+        return list(self._ventas)
 
     def consultar_ventas_usuario(
         self,
-        identificacion_usuario: str
+        identificacion_usuario: str,
     ) -> list[Venta]:
         """
-        Consulta las ventas de un usuario utilizando el índice.
-
-        No es necesario recorrer toda la lista principal de ventas.
+        Consulta las ventas utilizando el índice agrupado por usuario.
+        De esta manera no es necesario recorrer toda la lista de ventas.
         """
-
-        ventas = self._ventas_por_usuario.get(
-            identificacion_usuario,
-            []
+        return list(
+            self._ventas_por_usuario.get(
+                identificacion_usuario,
+                [],
+            )
         )
 
-        return ventas.copy()
-
-    # ============================================================
-    # BÚSQUEDAS INTERNAS OPTIMIZADAS
-    # ============================================================
-
-    def _buscar_producto_por_codigo(
-        self,
-        codigo: str
-    ) -> Producto | None:
-        """
-        Realiza una búsqueda directa en el diccionario índice
-        de productos.
-
-        Complejidad promedio: O(1).
-        """
-
-        return self._productos_por_codigo.get(codigo)
-
-    def _buscar_usuario_por_identificacion(
-        self,
-        identificacion: str
-    ) -> Usuario | None:
-        """
-        Realiza una búsqueda directa en el diccionario índice
-        de usuarios.
-
-        Complejidad promedio: O(1).
-        """
-
-        return self._usuarios_por_identificacion.get(
-            identificacion
-        )
-
-    # ============================================================
+    # =========================================================
     # CARGA Y RECONSTRUCCIÓN DE ÍNDICES
-    # ============================================================
+    # =========================================================
 
     def cargar_productos(
         self,
-        productos: list[Producto]
+        productos: list[Producto],
     ) -> None:
         """
-        Carga productos desde los objetos recuperados del JSON.
-
-        Después de cargar la lista principal se reconstruye
+        Carga los productos recuperados desde JSON y reconstruye
         el índice de productos por código.
         """
-
-        # Lista principal.
         self._productos = list(productos)
 
-        # Reconstrucción del índice.
         self._productos_por_codigo = {
             producto.codigo: producto
             for producto in self._productos
@@ -432,19 +304,14 @@ class Restaurante:
 
     def cargar_usuarios(
         self,
-        usuarios: list[Usuario]
+        usuarios: list[Usuario],
     ) -> None:
         """
-        Carga usuarios desde los objetos recuperados del JSON.
-
-        Después de cargar la lista principal se reconstruye
+        Carga los usuarios recuperados desde JSON y reconstruye
         el índice de usuarios por identificación.
         """
-
-        # Lista principal.
         self._usuarios = list(usuarios)
 
-        # Reconstrucción del índice.
         self._usuarios_por_identificacion = {
             usuario.identificacion: usuario
             for usuario in self._usuarios
@@ -452,29 +319,38 @@ class Restaurante:
 
     def cargar_ventas(
         self,
-        ventas: list[Venta]
+        ventas: list[Venta],
     ) -> None:
         """
-        Carga ventas desde los objetos recuperados del JSON.
-
-        Después de cargar la lista principal se reconstruye
-        el índice de ventas agrupadas por usuario.
+        Carga las ventas recuperadas desde JSON y reconstruye
+        el índice agrupado por usuario.
         """
-
-        # Lista principal.
         self._ventas = list(ventas)
 
-        # Reiniciar índice.
         self._ventas_por_usuario = {}
 
-        # Reconstruir índice.
         for venta in self._ventas:
+            ventas_usuario = self._ventas_por_usuario.setdefault(
+                venta.usuario_id,
+                []
+            )
 
-            if venta.usuario_id not in self._ventas_por_usuario:
-                self._ventas_por_usuario[
-                    venta.usuario_id
-                ] = []
+            ventas_usuario.append(venta)
 
-            self._ventas_por_usuario[
-                venta.usuario_id
-            ].append(venta)
+    # =========================================================
+    # MÉTODOS INTERNOS DE BÚSQUEDA
+    # =========================================================
+
+    def _buscar_producto_por_codigo(
+        self,
+        codigo: str,
+    ) -> Producto | None:
+        return self._productos_por_codigo.get(codigo)
+
+    def _buscar_usuario_por_identificacion(
+        self,
+        identificacion: str,
+    ) -> Usuario | None:
+        return self._usuarios_por_identificacion.get(
+            identificacion
+        )

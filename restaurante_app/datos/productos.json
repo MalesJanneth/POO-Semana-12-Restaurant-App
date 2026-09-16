@@ -46,5 +46,29 @@
         "precio": 4.0,
         "stock": 2,
         "disponible": true
+    },
+    {
+        "codigo": "1",
+        "nombre": "Arroz",
+        "categoria": "Segundo",
+        "precio": 1.5,
+        "stock": 2,
+        "disponible": true
+    },
+    {
+        "codigo": "2",
+        "nombre": "Helado",
+        "categoria": "Postre",
+        "precio": 1.5,
+        "stock": 6,
+        "disponible": true
+    },
+    {
+        "codigo": "3",
+        "nombre": "Encebollado",
+        "categoria": "Sopa",
+        "precio": 4.0,
+        "stock": 1,
+        "disponible": true
     }
 ]

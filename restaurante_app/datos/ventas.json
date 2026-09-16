@@ -3,5 +3,15 @@
         "usuario_id": "10046",
         "producto_codigo": "02",
         "cantidad": 1
+    },
+    {
+        "usuario_id": "10023",
+        "producto_codigo": "1",
+        "cantidad": 1
+    },
+    {
+        "usuario_id": "10021",
+        "producto_codigo": "3",
+        "cantidad": 2
     }
 ]
