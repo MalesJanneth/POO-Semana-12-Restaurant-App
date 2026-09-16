@@ -494,9 +494,7 @@ def main() -> None:
         str(RUTA_VENTAS),
     )
 
-    # =========================================================
     # CARGA DE DATOS Y RECONSTRUCCIÓN DE ÍNDICES
-    # =========================================================
 
     productos = archivo_servicio.cargar_productos()
     usuarios = archivo_servicio.cargar_usuarios()
@@ -506,8 +504,7 @@ def main() -> None:
     restaurante.cargar_usuarios(usuarios)
     restaurante.cargar_ventas(ventas)
 
-    # Los índices auxiliares quedan reconstruidos dentro
-    # de Restaurante a partir de los objetos recuperados.
+    # Los índices auxiliares quedan reconstruidos dentro de Restaurante a partir de los objetos recuperados.
 
     while True:
 

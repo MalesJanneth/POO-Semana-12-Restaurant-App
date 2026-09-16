@@ -10,9 +10,7 @@ class Restaurante:
     """
 
     def __init__(self) -> None:
-        # Colecciones principales.
-        # Se mantienen como listas porque permiten almacenar, recorrer
-        # y persistir los objetos.
+        # Colecciones principales se mantienen como listas porque permiten almacenar, recorrer y persistir los objetos.
         self._productos: list[Producto] = []
         self._usuarios: list[Usuario] = []
         self._ventas: list[Venta] = []
@@ -25,9 +23,7 @@ class Restaurante:
         # sin recorrer toda la colección de ventas.
         self._ventas_por_usuario: dict[str, list[Venta]] = {}
 
-    # =========================================================
     # PRODUCTOS
-    # =========================================================
 
     def registrar_producto(
         self,
@@ -78,7 +74,7 @@ class Restaurante:
         disponible: bool = True,
     ) -> Producto:
 
-        # Búsqueda mediante el índice.
+        # Búsqueda mediante el índice
         producto = self._productos_por_codigo.get(codigo_actual)
 
         if producto is None:
@@ -86,7 +82,7 @@ class Restaurante:
                 "No existe un producto con ese código."
             )
 
-        # Se verifica que el nuevo código no pertenezca a otro producto.
+        # Se verifica que el nuevo código no sea de otro producto.
         if (
             codigo != codigo_actual
             and codigo in self._productos_por_codigo
@@ -153,9 +149,7 @@ class Restaurante:
             for producto in self._productos
         }
 
-    # =========================================================
     # USUARIOS
-    # =========================================================
 
     def registrar_usuario(
         self,
@@ -201,9 +195,7 @@ class Restaurante:
     def obtener_usuarios(self) -> list[Usuario]:
         return list(self._usuarios)
 
-    # =========================================================
     # VENTAS
-    # =========================================================
 
     def vender_producto(
         self,
@@ -222,7 +214,6 @@ class Restaurante:
                 "No existe un usuario con esa identificación."
             )
 
-        # Búsqueda del producto mediante el índice.
         producto = self._productos_por_codigo.get(
             codigo_producto
         )
@@ -249,10 +240,10 @@ class Restaurante:
             cantidad,
         )
 
-        # Se actualiza la colección principal de ventas.
+        # Se actualiza la colección principal de ventas
         self._ventas.append(venta)
 
-        # Se actualiza el índice de ventas por usuario.
+        # Se actualiza el índice de ventas por usuario
         ventas_usuario = self._ventas_por_usuario.setdefault(
             usuario.identificacion,
             []
@@ -283,9 +274,7 @@ class Restaurante:
             )
         )
 
-    # =========================================================
     # CARGA Y RECONSTRUCCIÓN DE ÍNDICES
-    # =========================================================
 
     def cargar_productos(
         self,
@@ -337,9 +326,7 @@ class Restaurante:
 
             ventas_usuario.append(venta)
 
-    # =========================================================
     # MÉTODOS INTERNOS DE BÚSQUEDA
-    # =========================================================
 
     def _buscar_producto_por_codigo(
         self,
