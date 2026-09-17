@@ -23,6 +23,39 @@ class Restaurante:
         # sin recorrer toda la colección de ventas.
         self._ventas_por_usuario: dict[str, list[Venta]] = {}
 
+        # Conjunto auxiliar para mantener categorías únicas.
+        self._categorias: set[str] = set()
+
+    def _reconstruir_indices(self) -> None:
+        """
+        Reconstruye las estructuras auxiliares a partir de las
+        colecciones principales.
+        """
+        self._productos_por_codigo = {
+            producto.codigo: producto
+            for producto in self._productos
+        }
+
+        self._usuarios_por_identificacion = {
+            usuario.identificacion: usuario
+            for usuario in self._usuarios
+        }
+
+        self._ventas_por_usuario = {}
+
+        for venta in self._ventas:
+            ventas_usuario = self._ventas_por_usuario.setdefault(
+                venta.usuario_id,
+                []
+            )
+
+            ventas_usuario.append(venta)
+
+        self._categorias = {
+            producto.categoria
+            for producto in self._productos
+        }
+
     # PRODUCTOS
 
     def registrar_producto(
@@ -51,6 +84,7 @@ class Restaurante:
         # Se actualizan la colección principal y el índice.
         self._productos.append(producto)
         self._productos_por_codigo[codigo] = producto
+        self._categorias.add(categoria)
 
         return producto
 
@@ -111,6 +145,12 @@ class Restaurante:
             del self._productos_por_codigo[codigo_actual]
             self._productos_por_codigo[codigo] = producto
 
+        # Se reconstruye el conjunto de categorías por si la categoría cambió.
+        self._categorias = {
+            producto.categoria
+            for producto in self._productos
+        }
+
         return producto
 
     def eliminar_producto(
@@ -132,6 +172,12 @@ class Restaurante:
         # Se elimina del índice.
         del self._productos_por_codigo[codigo]
 
+        # Se reconstruye el conjunto de categorías.
+        self._categorias = {
+            producto.categoria
+            for producto in self._productos
+        }
+
         return producto
 
     def listar_productos(self) -> list[Producto]:
@@ -144,10 +190,7 @@ class Restaurante:
         """
         Utiliza un set porque las categorías no deben repetirse.
         """
-        return {
-            producto.categoria
-            for producto in self._productos
-        }
+        return set(self._categorias)
 
     # USUARIOS
 
@@ -282,14 +325,10 @@ class Restaurante:
     ) -> None:
         """
         Carga los productos recuperados desde JSON y reconstruye
-        el índice de productos por código.
+        los índices auxiliares.
         """
         self._productos = list(productos)
-
-        self._productos_por_codigo = {
-            producto.codigo: producto
-            for producto in self._productos
-        }
+        self._reconstruir_indices()
 
     def cargar_usuarios(
         self,
@@ -297,14 +336,10 @@ class Restaurante:
     ) -> None:
         """
         Carga los usuarios recuperados desde JSON y reconstruye
-        el índice de usuarios por identificación.
+        los índices auxiliares.
         """
         self._usuarios = list(usuarios)
-
-        self._usuarios_por_identificacion = {
-            usuario.identificacion: usuario
-            for usuario in self._usuarios
-        }
+        self._reconstruir_indices()
 
     def cargar_ventas(
         self,
@@ -312,19 +347,10 @@ class Restaurante:
     ) -> None:
         """
         Carga las ventas recuperadas desde JSON y reconstruye
-        el índice agrupado por usuario.
+        los índices auxiliares.
         """
         self._ventas = list(ventas)
-
-        self._ventas_por_usuario = {}
-
-        for venta in self._ventas:
-            ventas_usuario = self._ventas_por_usuario.setdefault(
-                venta.usuario_id,
-                []
-            )
-
-            ventas_usuario.append(venta)
+        self._reconstruir_indices()
 
     # MÉTODOS INTERNOS DE BÚSQUEDA
 

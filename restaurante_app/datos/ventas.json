@@ -13,5 +13,10 @@
         "usuario_id": "10021",
         "producto_codigo": "3",
         "cantidad": 2
+    },
+    {
+        "usuario_id": "10021",
+        "producto_codigo": "2",
+        "cantidad": 2
     }
 ]

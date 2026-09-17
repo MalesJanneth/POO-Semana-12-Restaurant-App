@@ -19,11 +19,12 @@ OPCIONES_MENU: tuple[str, ...] = (
     "4. Eliminar producto",
     "5. Listar productos",
     "6. Registrar usuario",
-    "7. Listar usuarios",
-    "8. Mostrar categorías",
-    "9. Vender producto",
-    "10. Consultar ventas de un usuario",
-    "11. Salir",
+    "7. Buscar usuario",
+    "8. Listar usuarios",
+    "9. Mostrar categorías",
+    "10. Vender producto",
+    "11. Consultar ventas de un usuario",
+    "12. Salir",
 )
 
 
@@ -254,6 +255,27 @@ def registrar_usuario(
         print(f"Error: {error}")
 
 
+def buscar_usuario(
+    restaurante: Restaurante,
+) -> None:
+
+    identificacion = input(
+        "Ingrese la identificación del usuario: "
+    ).strip()
+
+    usuario = restaurante.buscar_usuario(
+        identificacion
+    )
+
+    if usuario is None:
+        print(
+            "No existe un usuario con esa identificación."
+        )
+        return
+
+    print(usuario.mostrar_informacion())
+
+
 def listar_usuarios(
     restaurante: Restaurante,
 ) -> None:
@@ -405,11 +427,12 @@ def obtener_acciones_menu() -> dict[str, str]:
         "4": "eliminar_producto",
         "5": "listar_productos",
         "6": "registrar_usuario",
-        "7": "listar_usuarios",
-        "8": "mostrar_categorias",
-        "9": "vender_producto",
-        "10": "consultar_ventas_usuario",
-        "11": "salir",
+        "7": "buscar_usuario",
+        "8": "listar_usuarios",
+        "9": "mostrar_categorias",
+        "10": "vender_producto",
+        "11": "consultar_ventas_usuario",
+        "12": "salir",
     }
 
 
@@ -456,23 +479,26 @@ def ejecutar_accion(
         )
 
     elif opcion == "7":
-        listar_usuarios(restaurante)
+        buscar_usuario(restaurante)
 
     elif opcion == "8":
-        mostrar_categorias(restaurante)
+        listar_usuarios(restaurante)
 
     elif opcion == "9":
+        mostrar_categorias(restaurante)
+
+    elif opcion == "10":
         vender_producto(
             restaurante,
             archivo_servicio,
         )
 
-    elif opcion == "10":
+    elif opcion == "11":
         consultar_ventas_usuario(
             restaurante
         )
 
-    elif opcion == "11":
+    elif opcion == "12":
         print("Programa finalizado.")
         return False
 
@@ -522,7 +548,5 @@ def main() -> None:
 
         if not continuar:
             break
-
-
 if __name__ == "__main__":
     main()
