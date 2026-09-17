@@ -2,7 +2,6 @@ from modelos.producto import Producto
 from modelos.usuario import Usuario
 from modelos.venta import Venta
 
-
 class Restaurante:
     """
     Gestiona las colecciones principales del restaurante y utiliza

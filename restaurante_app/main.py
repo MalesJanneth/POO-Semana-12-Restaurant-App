@@ -3,14 +3,12 @@ from pathlib import Path
 from servicios.archivo_servicio import ArchivoServicio
 from servicios.restaurante import Restaurante
 
-
 BASE_DIR = Path(__file__).resolve().parent
 DATOS_DIR = BASE_DIR / "datos"
 
 RUTA_PRODUCTOS = DATOS_DIR / "productos.json"
 RUTA_USUARIOS = DATOS_DIR / "usuarios.json"
 RUTA_VENTAS = DATOS_DIR / "ventas.json"
-
 
 OPCIONES_MENU: tuple[str, ...] = (
     "1. Registrar producto",
@@ -27,21 +25,17 @@ OPCIONES_MENU: tuple[str, ...] = (
     "12. Salir",
 )
 
-
 def mostrar_menu() -> None:
     print("\n========== MENÚ PRINCIPAL ==========")
 
     for opcion in OPCIONES_MENU:
         print(opcion)
 
-
 def leer_entero(mensaje: str) -> int:
     return int(input(mensaje).strip())
 
-
 def leer_float(mensaje: str) -> float:
     return float(input(mensaje).strip())
-
 
 def registrar_producto(
     restaurante: Restaurante,
@@ -96,7 +90,6 @@ def buscar_producto(
         return
 
     print(producto.mostrar_informacion())
-
 
 def actualizar_producto(
     restaurante: Restaurante,
@@ -164,7 +157,6 @@ def actualizar_producto(
     except (ValueError, TypeError) as error:
         print(f"Error: {error}")
 
-
 def eliminar_producto(
     restaurante: Restaurante,
     archivo_servicio: ArchivoServicio,
@@ -212,7 +204,6 @@ def listar_productos(
     for producto in productos:
         print(producto.mostrar_informacion())
 
-
 def registrar_usuario(
     restaurante: Restaurante,
     archivo_servicio: ArchivoServicio,
@@ -254,7 +245,6 @@ def registrar_usuario(
     except (ValueError, TypeError) as error:
         print(f"Error: {error}")
 
-
 def buscar_usuario(
     restaurante: Restaurante,
 ) -> None:
@@ -275,7 +265,6 @@ def buscar_usuario(
 
     print(usuario.mostrar_informacion())
 
-
 def listar_usuarios(
     restaurante: Restaurante,
 ) -> None:
@@ -291,7 +280,6 @@ def listar_usuarios(
     for usuario in usuarios:
         print(usuario.mostrar_informacion())
 
-
 def mostrar_categorias(
     restaurante: Restaurante,
 ) -> None:
@@ -306,7 +294,6 @@ def mostrar_categorias(
 
     for categoria in sorted(categorias):
         print(f"- {categoria}")
-
 
 def vender_producto(
     restaurante: Restaurante,
@@ -359,7 +346,6 @@ def vender_producto(
 
     except (ValueError, TypeError) as error:
         print(f"Error: {error}")
-
 
 def consultar_ventas_usuario(
     restaurante: Restaurante,
@@ -414,7 +400,6 @@ def consultar_ventas_usuario(
             f"Cantidad: {venta.cantidad}"
         )
 
-
 def obtener_acciones_menu() -> dict[str, str]:
     """
     Diccionario auxiliar que representa las opciones válidas
@@ -434,7 +419,6 @@ def obtener_acciones_menu() -> dict[str, str]:
         "11": "consultar_ventas_usuario",
         "12": "salir",
     }
-
 
 def ejecutar_accion(
     opcion: str,
@@ -503,7 +487,6 @@ def ejecutar_accion(
         return False
 
     return True
-
 
 def main() -> None:
 
