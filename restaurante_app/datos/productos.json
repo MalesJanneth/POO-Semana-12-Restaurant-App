@@ -4,7 +4,7 @@
         "nombre": "Seco de pollo",
         "categoria": "Secos",
         "precio": 2.5,
-        "stock": 3,
+        "stock": 2,
         "disponible": true
     },
     {
@@ -61,14 +61,6 @@
         "categoria": "Postre",
         "precio": 1.5,
         "stock": 4,
-        "disponible": true
-    },
-    {
-        "codigo": "3",
-        "nombre": "Encebollado",
-        "categoria": "Sopa",
-        "precio": 4.0,
-        "stock": 1,
         "disponible": true
     }
 ]

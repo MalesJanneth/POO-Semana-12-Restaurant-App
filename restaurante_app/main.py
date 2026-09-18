@@ -10,78 +10,100 @@ RUTA_PRODUCTOS = DATOS_DIR / "productos.json"
 RUTA_USUARIOS = DATOS_DIR / "usuarios.json"
 RUTA_VENTAS = DATOS_DIR / "ventas.json"
 
-OPCIONES_MENU: tuple[str, ...] = (
-    "1. Registrar producto",
-    "2. Buscar producto",
-    "3. Actualizar producto",
-    "4. Eliminar producto",
-    "5. Listar productos",
-    "6. Registrar usuario",
-    "7. Buscar usuario",
-    "8. Listar usuarios",
-    "9. Mostrar categorías",
-    "10. Vender producto",
-    "11. Consultar ventas de un usuario",
-    "12. Salir",
+OPCIONES_MENU = (
+    ("1", "Registrar producto"),
+    ("2", "Buscar producto"),
+    ("3", "Listar productos"),
+    ("4", "Actualizar producto"),
+    ("5", "Eliminar producto"),
+    ("6", "Registrar usuario"),
+    ("7", "Buscar usuario por identificación"),
+    ("8", "Listar usuarios"),
+    ("9", "Actulizar usuario"),
+    ("10", "Eliminar usuario"),
+    ("11", "Registrar venta"),
+    ("12", "Consultar ventas de un usuario"),
+    ("13", "Listar ventas"),
+    ("14", "Vender producto"),
+    ("15", "Salir"),
 )
+
+def pedir_texto(mensaje: str) -> str:
+    return input(mensaje).strip()
+
+def pedir_entero(mensaje: str) -> int:
+    return int(pedir_texto(mensaje))
+
+def pedir_float(mensaje: str) -> float:
+    return float(pedir_texto(mensaje))
 
 def mostrar_menu() -> None:
     print("\n========== MENÚ PRINCIPAL ==========")
 
-    for opcion in OPCIONES_MENU:
-        print(opcion)
+    for numero, descripcion in OPCIONES_MENU:
+        print(f"{numero}. {descripcion}")
 
-def leer_entero(mensaje: str) -> int:
-    return int(input(mensaje).strip())
+def guardar_productos(
+    archivo_servicio: ArchivoServicio,
+    restaurante: Restaurante,
+) -> None:
+    if not archivo_servicio.guardar_productos(
+        restaurante.listar_productos()
+    ):
+        print("No se pudieron guardar los productos.")
 
-def leer_float(mensaje: str) -> float:
-    return float(input(mensaje).strip())
+def guardar_usuarios(
+    archivo_servicio: ArchivoServicio,
+    restaurante: Restaurante,
+) -> None:
+    if not archivo_servicio.guardar_usuarios(
+        restaurante.listar_usuarios()
+    ):
+        print("No se pudieron guardar los usuarios.")
+
+def guardar_ventas(
+    archivo_servicio: ArchivoServicio,
+    restaurante: Restaurante,
+) -> None:
+    if not archivo_servicio.guardar_ventas(
+        restaurante.listar_ventas()
+    ):
+        print("No se pudieron guardar las ventas.")
 
 def registrar_producto(
     restaurante: Restaurante,
     archivo_servicio: ArchivoServicio,
 ) -> None:
+    print("\n--- Registrar producto ---")
+
+    codigo = pedir_texto("Código: ")
+    nombre = pedir_texto("Nombre: ")
+    categoria = pedir_texto("Categoría: ")
+    precio = pedir_float("Precio: ")
+    stock = pedir_entero("Stock: ")
 
     try:
-        codigo = input("Código: ").strip()
-        nombre = input("Nombre: ").strip()
-        categoria = input("Categoría: ").strip()
-        precio = leer_float("Precio: ")
-        stock = leer_entero("Stock: ")
+        producto = restaurante.registrar_producto(codigo, nombre, categoria, precio, stock)
 
-        producto = restaurante.registrar_producto(
-            codigo,
-            nombre,
-            categoria,
-            precio,
-            stock,
+        guardar_productos(
+            archivo_servicio,
+            restaurante,
         )
 
-        if archivo_servicio.guardar_productos(
-            restaurante.obtener_productos()
-        ):
-            print(
-                "Producto registrado y guardado correctamente."
-            )
-        else:
-            print(
-                "Producto registrado en memoria, "
-                "pero no pudo guardarse en productos.json."
-            )
-
+        print("Producto registrado correctamente.")
         print(producto.mostrar_informacion())
 
     except (ValueError, TypeError) as error:
         print(f"Error: {error}")
 
-
 def buscar_producto(
     restaurante: Restaurante,
 ) -> None:
+    print("\n--- Buscar producto ---")
 
-    codigo = input(
+    codigo = pedir_texto(
         "Ingrese el código del producto: "
-    ).strip()
+    )
 
     producto = restaurante.buscar_producto(codigo)
 
@@ -91,155 +113,114 @@ def buscar_producto(
 
     print(producto.mostrar_informacion())
 
+def listar_productos(
+    restaurante: Restaurante,
+) -> None:
+    print("\n--- Lista de productos ---")
+
+    productos = restaurante.listar_productos()
+
+    if len(productos) == 0:
+        print("No existen productos registrados.")
+        return
+
+    for indice, producto in enumerate(productos):
+        print(f"{indice + 1}.")
+        print(producto.mostrar_informacion())
+
+
 def actualizar_producto(
     restaurante: Restaurante,
     archivo_servicio: ArchivoServicio,
 ) -> None:
+    print("\n--- Actualizar producto ---")
+
+    codigo_actual = pedir_texto(
+        "Código del producto que desea actualizar: "
+    )
+
+    producto_actual = restaurante.buscar_producto(
+        codigo_actual
+    )
+
+    if producto_actual is None:
+        print("Producto no encontrado.")
+        return
+
+    codigo = pedir_texto("Nuevo código: ")
+    nombre = pedir_texto("Nuevo nombre: ")
+    categoria = pedir_texto("Nueva categoría: ")
+    precio = pedir_float("Nuevo precio: ")
+    stock = pedir_entero("Nuevo stock: ")
 
     try:
-        codigo_actual = input(
-            "Código del producto que desea actualizar: "
-        ).strip()
+        producto = restaurante.actualizar_producto(codigo_actual, codigo, nombre, categoria, precio, stock,)
 
-        producto_actual = restaurante.buscar_producto(
-            codigo_actual
+        guardar_productos(
+            archivo_servicio,
+            restaurante,
         )
 
-        if producto_actual is None:
-            print("Producto no encontrado.")
-            return
-
-        print("Ingrese los nuevos datos:")
-
-        codigo = input("Nuevo código: ").strip()
-        nombre = input("Nuevo nombre: ").strip()
-        categoria = input("Nueva categoría: ").strip()
-        precio = leer_float("Nuevo precio: ")
-        stock = leer_entero("Nuevo stock: ")
-
-        producto = restaurante.actualizar_producto(
-            codigo_actual,
-            codigo,
-            nombre,
-            categoria,
-            precio,
-            stock,
-        )
-
-        if archivo_servicio.guardar_productos(
-            restaurante.obtener_productos()
-        ):
-            print(
-                "Producto actualizado y guardado correctamente."
-            )
-        else:
-            print(
-                "Producto actualizado en memoria, "
-                "pero no pudo guardarse en productos.json."
-            )
-
-        # Las ventas se actualizan internamente si cambió
-        # el código del producto.
         if codigo != codigo_actual:
-            if archivo_servicio.guardar_ventas(
-                restaurante.obtener_ventas()
-            ):
-                print(
-                    "Las ventas relacionadas también fueron actualizadas."
-                )
-            else:
-                print(
-                    "No se pudo actualizar ventas.json."
-                )
+            guardar_ventas(
+                archivo_servicio,
+                restaurante,
+            )
 
+        print("Producto actualizado correctamente.")
         print(producto.mostrar_informacion())
 
     except (ValueError, TypeError) as error:
         print(f"Error: {error}")
+
 
 def eliminar_producto(
     restaurante: Restaurante,
     archivo_servicio: ArchivoServicio,
 ) -> None:
+    print("\n--- Eliminar producto ---")
+
+    codigo = pedir_texto(
+        "Código del producto a eliminar: "
+    )
 
     try:
-        codigo = input(
-            "Código del producto a eliminar: "
-        ).strip()
-
         producto = restaurante.eliminar_producto(codigo)
 
-        if archivo_servicio.guardar_productos(
-            restaurante.obtener_productos()
-        ):
-            print(
-                "Producto eliminado y cambios guardados correctamente."
-            )
-        else:
-            print(
-                "Producto eliminado en memoria, "
-                "pero no pudo actualizarse productos.json."
-            )
-
-        print(
-            f"Producto eliminado: {producto.nombre}"
+        guardar_productos(
+            archivo_servicio,
+            restaurante,
         )
+
+        print("Producto eliminado correctamente.")
+        print(f"Producto eliminado: {producto.nombre}")
 
     except (ValueError, TypeError) as error:
         print(f"Error: {error}")
-
-
-def listar_productos(
-    restaurante: Restaurante,
-) -> None:
-
-    productos = restaurante.listar_productos()
-
-    if not productos:
-        print("No existen productos registrados.")
-        return
-
-    print("\n========== PRODUCTOS ==========")
-
-    for producto in productos:
-        print(producto.mostrar_informacion())
 
 def registrar_usuario(
     restaurante: Restaurante,
     archivo_servicio: ArchivoServicio,
 ) -> None:
+    print("\n--- Registrar usuario ---")
+
+    identificacion = pedir_texto("Identificación: ")
+    nombre = pedir_texto("Nombre: ")
+    correo = pedir_texto("Correo: ")
 
     try:
-        identificacion = input(
-            "Identificación: "
-        ).strip()
-
-        nombre = input(
-            "Nombre: "
-        ).strip()
-
-        correo = input(
-            "Correo: "
-        ).strip()
-
         usuario = restaurante.registrar_usuario(
             identificacion,
             nombre,
             correo,
         )
 
-        if archivo_servicio.guardar_usuarios(
-            restaurante.obtener_usuarios()
-        ):
-            print(
-                "Usuario registrado y guardado correctamente."
-            )
-        else:
-            print(
-                "Usuario registrado en memoria, "
-                "pero no pudo guardarse en usuarios.json."
-            )
+        guardar_usuarios(
+            archivo_servicio,
+            restaurante,
+        )
 
+        print("Usuario registrado correctamente.")
         print(usuario.mostrar_informacion())
 
     except (ValueError, TypeError) as error:
@@ -248,10 +229,11 @@ def registrar_usuario(
 def buscar_usuario(
     restaurante: Restaurante,
 ) -> None:
+    print("\n--- Buscar usuario por identificación ---")
 
-    identificacion = input(
+    identificacion = pedir_texto(
         "Ingrese la identificación del usuario: "
-    ).strip()
+    )
 
     usuario = restaurante.buscar_usuario(
         identificacion
@@ -268,80 +250,124 @@ def buscar_usuario(
 def listar_usuarios(
     restaurante: Restaurante,
 ) -> None:
+    print("\n--- Lista de usuarios ---")
 
     usuarios = restaurante.listar_usuarios()
 
-    if not usuarios:
+    if len(usuarios) == 0:
         print("No existen usuarios registrados.")
         return
 
-    print("\n========== USUARIOS ==========")
-
-    for usuario in usuarios:
+    for indice, usuario in enumerate(usuarios):
+        print(f"{indice + 1}.")
         print(usuario.mostrar_informacion())
 
-def mostrar_categorias(
-    restaurante: Restaurante,
-) -> None:
 
-    categorias = restaurante.obtener_categorias()
-
-    if not categorias:
-        print("No existen categorías registradas.")
-        return
-
-    print("\n========== CATEGORÍAS ==========")
-
-    for categoria in sorted(categorias):
-        print(f"- {categoria}")
-
-def vender_producto(
+def actualizar_usuario(
     restaurante: Restaurante,
     archivo_servicio: ArchivoServicio,
 ) -> None:
+    print("\n--- Actualizar usuario ---")
+
+    identificacion = pedir_texto(
+        "Identificación del usuario: "
+    )
+
+    usuario = restaurante.buscar_usuario(
+        identificacion
+    )
+
+    if usuario is None:
+        print(
+            "No existe un usuario con esa identificación."
+        )
+        return
+
+    nombre = pedir_texto("Nuevo nombre: ")
+    correo = pedir_texto("Nuevo correo: ")
 
     try:
-        identificacion_usuario = input(
-            "Identificación del usuario: "
-        ).strip()
-
-        codigo_producto = input(
-            "Código del producto: "
-        ).strip()
-
-        cantidad = leer_entero(
-            "Cantidad: "
+        usuario = restaurante.actualizar_usuario(
+            identificacion,
+            nombre,
+            correo,
         )
 
-        venta = restaurante.vender_producto(
+        guardar_usuarios(
+            archivo_servicio,
+            restaurante,
+        )
+
+        print("Usuario actualizado correctamente.")
+        print(usuario.mostrar_informacion())
+
+    except (ValueError, TypeError) as error:
+        print(f"Error: {error}")
+
+def eliminar_usuario(
+    restaurante: Restaurante,
+    archivo_servicio: ArchivoServicio,
+) -> None:
+    print("\n--- Eliminar usuario ---")
+
+    identificacion = pedir_texto(
+        "Identificación del usuario: "
+    )
+
+    try:
+        usuario = restaurante.eliminar_usuario(
+            identificacion
+        )
+
+        guardar_usuarios(
+            archivo_servicio,
+            restaurante,
+        )
+
+        print("Usuario eliminado correctamente.")
+        print(f"Usuario eliminado: {usuario.nombre}")
+
+    except (ValueError, TypeError) as error:
+        print(f"Error: {error}")
+
+def registrar_venta(
+    restaurante: Restaurante,
+    archivo_servicio: ArchivoServicio,
+) -> None:
+    print("\n--- Registrar venta ---")
+
+    identificacion_usuario = pedir_texto(
+        "Identificación del usuario: "
+    )
+
+    codigo_producto = pedir_texto(
+        "Código del producto: "
+    )
+
+    cantidad = pedir_entero("Cantidad: ")
+
+    try:
+        venta = restaurante.registrar_venta(
             identificacion_usuario,
             codigo_producto,
             cantidad,
         )
 
-        ventas_guardadas = archivo_servicio.guardar_ventas(
-            restaurante.obtener_ventas()
+        guardar_ventas(
+            archivo_servicio,
+            restaurante,
         )
 
-        productos_guardados = archivo_servicio.guardar_productos(
-            restaurante.obtener_productos()
+        guardar_productos(
+            archivo_servicio,
+            restaurante,
         )
 
-        if ventas_guardadas and productos_guardados:
-            print(
-                "Venta realizada y datos guardados correctamente."
-            )
-        else:
-            print(
-                "La venta se realizó en memoria, "
-                "pero no se pudieron guardar correctamente "
-                "todos los archivos JSON."
-            )
-
+        print("Venta registrada correctamente.")
         print(
-            f"Venta registrada: usuario {venta.usuario_id}, "
-            f"producto {venta.producto_codigo}, "
-            f"cantidad {venta.cantidad}."
+            f"Usuario: {venta.usuario_id} | "
+            f"Producto: {venta.producto_codigo} | "
+            f"Cantidad: {venta.cantidad}"
         )
 
     except (ValueError, TypeError) as error:
@@ -350,10 +376,11 @@ def vender_producto(
 def consultar_ventas_usuario(
     restaurante: Restaurante,
 ) -> None:
+    print("\n--- Consultar ventas de un usuario ---")
 
-    identificacion_usuario = input(
+    identificacion_usuario = pedir_texto(
         "Identificación del usuario: "
-    ).strip()
+    )
 
     usuario = restaurante.buscar_usuario(
         identificacion_usuario
@@ -365,34 +392,26 @@ def consultar_ventas_usuario(
         )
         return
 
-    # Esta consulta utiliza directamente el índice
-    # de ventas agrupadas por usuario.
     ventas = restaurante.consultar_ventas_usuario(
         identificacion_usuario
     )
 
-    if not ventas:
-        print(
-            "El usuario no tiene ventas registradas."
-        )
+    if len(ventas) == 0:
+        print("El usuario no tiene ventas registradas.")
         return
 
-    print(
-        f"\n========== VENTAS DE {usuario.nombre} =========="
-    )
+    print(f"\nUsuario: {usuario.nombre}")
 
     for venta in ventas:
-
-        # La búsqueda del producto también utiliza
-        # el índice por código.
         producto = restaurante.buscar_producto(
             venta.producto_codigo
         )
 
-        if producto is not None:
-            nombre_producto = producto.nombre
-        else:
-            nombre_producto = "Producto no disponible"
+        nombre_producto = (
+            producto.nombre
+            if producto is not None
+            else "Producto no disponible"
+        )
 
         print(
             f"Producto: {nombre_producto} | "
@@ -400,102 +419,51 @@ def consultar_ventas_usuario(
             f"Cantidad: {venta.cantidad}"
         )
 
-def obtener_acciones_menu() -> dict[str, str]:
-    """
-    Diccionario auxiliar que representa las opciones válidas
-    del menú.
-    """
-    return {
-        "1": "registrar_producto",
-        "2": "buscar_producto",
-        "3": "actualizar_producto",
-        "4": "eliminar_producto",
-        "5": "listar_productos",
-        "6": "registrar_usuario",
-        "7": "buscar_usuario",
-        "8": "listar_usuarios",
-        "9": "mostrar_categorias",
-        "10": "vender_producto",
-        "11": "consultar_ventas_usuario",
-        "12": "salir",
-    }
-
-def ejecutar_accion(
-    opcion: str,
+def listar_ventas(
     restaurante: Restaurante,
-    archivo_servicio: ArchivoServicio,
-) -> bool:
+) -> None:
+    print("\n--- Lista de ventas ---")
 
-    acciones = obtener_acciones_menu()
+    ventas = restaurante.listar_ventas()
 
-    if opcion not in acciones:
-        print("Opción no válida.")
-        return True
+    if len(ventas) == 0:
+        print("No existen ventas registradas.")
+        return
 
-    if opcion == "1":
-        registrar_producto(
-            restaurante,
-            archivo_servicio,
+    for indice, venta in enumerate(ventas):
+        usuario = restaurante.buscar_usuario(
+            venta.usuario_id
         )
 
-    elif opcion == "2":
-        buscar_producto(restaurante)
-
-    elif opcion == "3":
-        actualizar_producto(
-            restaurante,
-            archivo_servicio,
+        producto = restaurante.buscar_producto(
+            venta.producto_codigo
         )
 
-    elif opcion == "4":
-        eliminar_producto(
-            restaurante,
-            archivo_servicio,
+        nombre_usuario = (
+            usuario.nombre
+            if usuario is not None
+            else "Usuario no disponible"
         )
 
-    elif opcion == "5":
-        listar_productos(restaurante)
-
-    elif opcion == "6":
-        registrar_usuario(
-            restaurante,
-            archivo_servicio,
+        nombre_producto = (
+            producto.nombre
+            if producto is not None
+            else "Producto no disponible"
         )
 
-    elif opcion == "7":
-        buscar_usuario(restaurante)
-
-    elif opcion == "8":
-        listar_usuarios(restaurante)
-
-    elif opcion == "9":
-        mostrar_categorias(restaurante)
-
-    elif opcion == "10":
-        vender_producto(
-            restaurante,
-            archivo_servicio,
+        print(
+            f"{indice + 1}. "
+            f"Usuario: {nombre_usuario} | "
+            f"Producto: {nombre_producto} | "
+            f"Código: {venta.producto_codigo} | "
+            f"Cantidad: {venta.cantidad}"
         )
 
-    elif opcion == "11":
-        consultar_ventas_usuario(
-            restaurante
-        )
-
-    elif opcion == "12":
-        print("Programa finalizado.")
-        return False
-
-    return True
-
-def main() -> None:
-
+def ejecutar_menu() -> None:
     DATOS_DIR.mkdir(
         parents=True,
         exist_ok=True,
     )
-
-    restaurante = Restaurante()
 
     archivo_servicio = ArchivoServicio(
         str(RUTA_PRODUCTOS),
@@ -503,7 +471,7 @@ def main() -> None:
         str(RUTA_VENTAS),
     )
 
-    # CARGA DE DATOS Y RECONSTRUCCIÓN DE ÍNDICES
+    restaurante = Restaurante()
 
     productos = archivo_servicio.cargar_productos()
     usuarios = archivo_servicio.cargar_usuarios()
@@ -513,23 +481,40 @@ def main() -> None:
     restaurante.cargar_usuarios(usuarios)
     restaurante.cargar_ventas(ventas)
 
-    # Los índices auxiliares quedan reconstruidos dentro de Restaurante a partir de los objetos recuperados.
+    opciones = {
+        "1": lambda: registrar_producto(restaurante, archivo_servicio),
+        "2": lambda: buscar_producto(restaurante),
+        "3": lambda: listar_productos(restaurante),
+        "4": lambda: actualizar_producto(restaurante, archivo_servicio),
+        "5": lambda: eliminar_producto(restaurante, archivo_servicio),
+        "6": lambda: registrar_usuario(restaurante, archivo_servicio),
+        "7": lambda: buscar_usuario(restaurante),
+        "8": lambda: listar_usuarios(restaurante),
+        "9": lambda: actualizar_usuario(restaurante, archivo_servicio),
+        "10": lambda: eliminar_usuario(restaurante, archivo_servicio),
+        "11": lambda: registrar_venta(restaurante, archivo_servicio),
+        "12": lambda: consultar_ventas_usuario(restaurante),
+        "13": lambda: listar_ventas(restaurante),
+        "14": lambda: registrar_venta(restaurante, archivo_servicio),
+    }
 
     while True:
-
         mostrar_menu()
 
-        opcion = input(
+        opcion = pedir_texto(
             "\nSeleccione una opción: "
-        ).strip()
-
-        continuar = ejecutar_accion(
-            opcion,
-            restaurante,
-            archivo_servicio,
         )
 
-        if not continuar:
+        if opcion == "15":
+            print("Programa finalizado.")
             break
+
+        accion = opciones.get(opcion)
+
+        if accion is None:
+            print("Opción no válida.")
+        else:
+            accion()
+
 if __name__ == "__main__":
-    main()
+    ejecutar_menu()
